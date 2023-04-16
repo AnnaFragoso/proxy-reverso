@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  express:
+    image: annabarbara/express-fc
+    build: ./node-server
+    container_name: node-server
+    # entrypoint: dockerize -wait tcp://db:3306 -timeout 20s docker-entrypoint.sh
+    networks:
+      - nodenet
+    volumes:
+      - ./node-server:/usr/src/app
+    tty: true
+    ports:
+      - "4000:4000"
+
+  nginx-server:
+    image: annabarbara/nginx-fc
+    build: ./nginx
+    container_name: nginx
+    networks:
+      - nodenet
+    ports:
+      - "3000:3000"
+
+  db:
+    image: mysql:8
+    container_name: db
+    restart: always
+    tty: true
+    volumes: 
+      - ./mysql:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=fullcycledb
+      - MYSQL_ROOT_PASSWORD=root
+      # - MYSQL_USER=root
+    networks: 
+      - nodenet
+
+networks:
+  nodenet:
+    driver: bridge
